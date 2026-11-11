@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="ur">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>TrxWinGo 1M Ruby Fire Engine</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800;900&display=swap');
+
+        :root {
+            --bg-deep: #140507;
+            --card-glass: rgba(30, 10, 15, 0.88);
+            --white-stroke: rgba(255, 51, 68, 0.3);
+            --fire-red: #ff3344;
+            --fire-orange: #ff8800;
+            --neon-green: #10b981;
+            --neon-red: #ff3366;
+            --gold: #ffb703;
+            --skip-orange: #f97316;
+            --text-main: #f8fafc;
+            --text-sub: #cbd5e1;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Plus Jakarta Sans', system-ui, sans-serif; }
+        
+        body { 
+            background: radial-gradient(circle at 50% 0%, #450a0a 0%, var(--bg-deep) 75%);
+            color: var(--text-main); 
+            display: flex; 
+            justify-content: center; 
+            align-items: center;
+            min-height: 100vh;
+            padding: 12px 8px; 
+        }
+
+        .app-card {
+            width: 100%; max-width: 440px; 
+            background: linear-gradient(145deg, rgba(38, 12, 18, 0.92), rgba(15, 5, 8, 0.96));
+            backdrop-filter: blur(25px); 
+            border-radius: 28px; 
+            padding: 20px 16px;
+            border: 1.5px solid rgba(255, 51, 68, 0.35); 
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.7), 0 0 35px rgba(255, 51, 68, 0.15);
+        }
+
+        .top-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; }
+        .header-title h1 { 
+            font-size: 11px; 
+            background: linear-gradient(90deg, var(--fire-red), var(--gold));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-weight: 900; 
+            text-transform: uppercase; 
+            letter-spacing: 0.5px;
+        }
+        
+        .telegram-btn { 
+            background: linear-gradient(135deg, var(--fire-red), var(--fire-orange)); 
+            color: #fff; 
+            font-size: 9.5px; 
+            font-weight: 800; 
+            padding: 7px 12px; 
+            border-radius: 20px; 
+            text-decoration: none;
+            box-shadow: 0 4px 15px rgba(255, 51, 68, 0.35);
+            transition: all 0.3s ease;
+        }
+        .telegram-btn:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(255, 51, 68, 0.55); }
+
+        .screen {
+            background: linear-gradient(135deg, rgba(28, 9, 13, 0.95), rgba(8, 2, 4, 0.99));
+            border-radius: 20px; 
+            padding: 22px 12px; 
+            text-align: center; 
+            margin-bottom: 14px;
+            border: 1.5px solid rgba(255, 51, 68, 0.4);
+            box-shadow: inset 0 0 25px rgba(255, 51, 68, 0.1), 0 8px 25px rgba(0, 0, 0, 0.5);
+            position: relative;
+        }
+
+        .pred-label { font-size: 9.5px; color: var(--text-sub); font-weight: 800; letter-spacing: 1.5px; text-transform: uppercase; }
+
+        .pred-trend { 
+            font-size: 38px; font-weight: 900; margin: 10px 0; color: #fff; 
+            text-shadow: 0 0 25px rgba(255, 51, 68, 0.75);
+            letter-spacing: 3px;
+        }
+        .pred-trend.skip-mode {
+            color: var(--skip-orange);
+            text-shadow: 0 0 25px rgba(249, 115, 22, 0.8);
+        }
+        .pred-trend.green-mode {
+            color: var(--neon-green);
+            text-shadow: 0 0 25px rgba(16, 185, 129, 0.8);
+        }
+        .pred-trend.red-mode {
+            color: var(--neon-red);
+            text-shadow: 0 0 25px rgba(255, 51, 102, 0.8);
+        }
+
+        .phase-indicator {
+            display: inline-flex; font-size: 9.5px; padding: 6px 14px; border-radius: 20px; font-weight: 800;
+            background: linear-gradient(90deg, rgba(255, 51, 68, 0.15), rgba(255, 136, 0, 0.25)); 
+            color: var(--fire-orange); border: 1px solid rgba(255, 136, 0, 0.4);
+            margin-top: 4px;
+            box-shadow: 0 0 12px rgba(255, 136, 0, 0.15);
+        }
+        .phase-indicator.skip-phase {
+            background: rgba(249, 115, 22, 0.2); color: var(--skip-orange); border-color: var(--skip-orange);
+            box-shadow: 0 0 12px rgba(249, 115, 22, 0.2);
+        }
+
+        .period-box {
+            background: rgba(28, 9, 13, 0.7); border-radius: 16px; padding: 10px 14px;
+            display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; 
+            border: 1px solid rgba(255, 51, 68, 0.2);
+        }
+
+        .timer-container {
+            background: rgba(28, 9, 13, 0.8); border-radius: 16px; padding: 10px 14px; margin-bottom: 12px; 
+            border: 1px solid rgba(16, 185, 129, 0.3); text-align: center;
+            box-shadow: 0 0 15px rgba(16, 185, 129, 0.1);
+        }
+        .timer-clock { font-size: 22px; font-weight: 900; color: var(--neon-green); font-family: 'Courier New', monospace; text-shadow: 0 0 10px rgba(16, 185, 129, 0.5); }
+
+        .logic-panel { 
+            background: rgba(28, 9, 13, 0.7); border-radius: 16px; padding: 12px; margin-bottom: 12px; 
+            border: 1px solid rgba(255, 51, 68, 0.2); 
+        }
+        .logic-box { 
+            font-size: 9.5px; color: #cbd5e1; line-height: 1.4; 
+            background: rgba(10, 3, 5, 0.7); padding: 10px; border-radius: 10px; text-align: left; 
+            border: 1px solid rgba(255, 51, 68, 0.15);
+        }
+
+        .history-container { 
+            background: rgba(28, 9, 13, 0.8); border-radius: 16px; padding: 12px; 
+            border: 1px solid rgba(255, 183, 3, 0.25); max-height: 160px; overflow-y: auto; 
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+        }
+        .history-table { width: 100%; border-collapse: collapse; font-size: 9.5px; text-align: center; }
+        .history-table th { color: var(--text-sub); padding: 6px 2px; border-bottom: 1px solid rgba(255, 51, 68, 0.25); position: sticky; top: 0; background: #1a060a; }
+        .history-table td { padding: 6px 2px; border-bottom: 1px solid rgba(255, 51, 68, 0.1); }
+
+        .badge-win { background: rgba(16, 185, 129, 0.25); color: var(--neon-green); border: 1px solid var(--neon-green); padding: 2px 8px; border-radius: 6px; font-weight: 800; box-shadow: 0 0 8px rgba(16, 185, 129, 0.3); }
+        .badge-loss { background: rgba(255, 51, 102, 0.25); color: var(--neon-red); border: 1px solid var(--neon-red); padding: 2px 8px; border-radius: 6px; font-weight: 800; box-shadow: 0 0 8px rgba(255, 51, 102, 0.3); }
+        .badge-skip { background: rgba(249, 115, 22, 0.25); color: var(--skip-orange); border: 1px solid var(--skip-orange); padding: 2px 8px; border-radius: 6px; font-weight: 800; box-shadow: 0 0 8px rgba(249, 115, 22, 0.3); }
+    </style>
+</head>
+<body>
+
+<div class="app-card">
+    <div class="top-bar">
+        <div class="header-title"><h1>TrxWinGo Ruby Fire Engine</h1></div>
+        <a href="https://t.me/AsifWingoExperttrick" target="_blank" class="telegram-btn">JOIN TELEGRAM</a>
+    </div>
+
+    <div class="screen">
+        <div class="pred-label">TRX 1M RUBY FIRE SIGNAL</div>
+        <div class="pred-trend" id="predTrend">ANALYZING...</div>
+        <div class="phase-indicator" id="phaseMode">⚡ Fire Engine Active</div>
+    </div>
+
+    <div class="period-box">
+        <div><div style="font-size:9px; color:var(--text-sub)">TARGET PERIOD</div><div style="font-size:14px; font-weight:900; color:var(--gold)" id="targetPeriod">----</div></div>
+        <div style="text-align: right;"><div style="font-size:9px; color:var(--text-sub)">LAST RESULT</div><div style="font-size:14px; font-weight:900; color:var(--fire-red)" id="lastNum">-</div></div>
+    </div>
+
+    <div class="timer-container">
+        <div class="timer-clock" id="timerClock">01:00</div>
+    </div>
+
+    <div class="logic-panel">
+        <div style="font-size: 9px; color: var(--fire-orange); font-weight: 800; margin-bottom: 4px;">🧠 RUBY FIRE - WIN-SWITCH & STICKY LOGIC</div>
+        <div class="logic-box" id="logicBox">> TrxWinGo 1M feed active. Stays on same market during loss, switches on win...</div>
+    </div>
+
+    <div class="history-container">
+        <div style="font-size:9px; color:var(--text-sub); margin-bottom:8px; display:flex; justify-content:space-between;">
+            <span style="color: var(--gold); font-weight: 800;">FLOW HISTORY</span>
+            <span id="winRateText" style="color:var(--gold); font-weight: 800;">WIN: 0/0 (SKIPPED: 0)</span>
+        </div>
+        <table class="history-table">
+            <thead>
+                <tr>
+                    <th>PERIOD</th>
+                    <th>RESULT</th>
+                    <th>PREDICT</th>
+                    <th>STATUS</th>
+                </tr>
+            </thead>
+            <tbody id="historyBody">
+                <tr><td colspan="4" style="color:var(--text-sub);">Connecting TrxWinGo 1M...</td></tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+    const TRX_WINGO_1M_API = "https://draw.ar-lottery01.com/TrxWinGo/TrxWinGo_1M/GetHistoryIssuePage.json";
+    let totalWins = 0, totalLosses = 0, totalSkipped = 0;
+    let lastPrediction = null, lastProcessedIssue = "", historyLogs = [];
+    let skipCount = 0; 
+    let modeToggle = "BIGSMALL"; // مارکیٹ موڈ: بگ/سمال یا کلر
+
+    function startTimerEngine() {
+        setInterval(() => {
+            const remSec = 60 - (new Date().getSeconds() % 60);
+            const min = Math.floor(remSec / 60);
+            const sec = remSec % 60;
+            document.getElementById('timerClock').innerText = `0${min}:${sec < 10 ? '0' : ''}${sec}`;
+            if (remSec === 58 || remSec === 2) runLiveEngine();
+        }, 1000);
+    }
+
+    async function fetchDirectData() {
+        try {
+            const res = await fetch(TRX_WINGO_1M_API);
+            if (res.ok) {
+                const json = await res.json();
+                return json.data?.list || json.list || [];
+            }
+        } catch (e) {}
+        return null;
+    }
+
+    function getColor(num) {
+        if ([1, 3, 7, 9].includes(num)) return "GREEN";
+        if ([2, 4, 6, 8].includes(num)) return "RED";
+        if (num === 0) return "RED";
+        if (num === 5) return "GREEN";
+        return "GREEN";
+    }
+
+    function computeSmartFlowSignal(list) {
+        if (!list || list.length < 8) return { decision: "BIG", phase: "Initializing", reason: "Gathering Trx records..." };
+
+        const nums = list.slice(0, 8).map(i => parseInt(i.number ?? i.num));
+        
+        if (skipCount > 0) {
+            skipCount--;
+            return {
+                decision: "SKIP ⏸️",
+                phase: "🛑 Protection Active",
+                reason: `Safeguarding capital. (${skipCount} left)`
+            };
+        }
+
+        if (modeToggle === "BIGSMALL") {
+            const sizes = nums.map(n => (n >= 5 ? "BIG" : "SMALL"));
+
+            let alternatingChaos = (sizes[0] !== sizes[1] && sizes[1] === sizes[2] && sizes[2] !== sizes[3]);
+            if (alternatingChaos) {
+                skipCount = 1;
+                return { decision: "SKIP ⏸️", phase: "⚠️ Choppy Trap", reason: `Messy pattern in Big/Small. Safe skip.` };
+            }
+
+            if (sizes[0] === sizes[1] && sizes[1] === sizes[2]) {
+                return { decision: sizes[0], phase: `🐉 Ruby Dragon (${sizes[0]})`, reason: `Strong streak found for ${sizes[0]}.` };
+            }
+
+            if (sizes[0] !== sizes[1] && sizes[1] !== sizes[2]) {
+                let target = (sizes[0] === "BIG") ? "SMALL" : "BIG";
+                return { decision: target, phase: `⚡ Ruby Zig-Zag`, reason: `Alternating flow. Target: ${target}.` };
+            }
+
+            let sum5 = nums.slice(0, 5).reduce((a, b) => a + b, 0);
+            return { decision: sum5 >= 23 ? "BIG" : "SMALL", phase: `📊 Balanced Flow`, reason: `Moving sum points to Big/Small.` };
+
+        } else {
+            const colors = nums.map(n => getColor(n));
+
+            if (colors[0] === colors[1] && colors[1] === colors[2]) {
+                return { decision: colors[0], phase: `🐉 Ruby Color Dragon (${colors[0]})`, reason: `Color streak found for ${colors[0]}.` };
+            }
+
+            if (colors[0] !== colors[1] && colors[1] !== colors[2]) {
+                let colorTarget = (colors[0] === "GREEN") ? "RED" : "GREEN";
+                return { decision: colorTarget, phase: `⚡ Ruby Color Zig-Zag`, reason: `Alternating colors. Target: ${colorTarget}.` };
+            }
+
+            let defaultColor = (colors[0] === "GREEN") ? "RED" : "GREEN";
+            return { decision: defaultColor, phase: `🎨 Ruby Color Flow`, reason: `Color momentum targets ${defaultColor}.` };
+        }
+    }
+
+    async function runLiveEngine() {
+        const list = await fetchDirectData();
+        if (!list || list.length === 0) return;
+
+        const latest = list[0];
+        const lastNum = parseInt(latest.number ?? latest.num);
+        const lastIssue = String(latest.issueNumber ?? latest.issue);
+        const actualSize = lastNum >= 5 ? "BIG" : "SMALL";
+        const actualColor = getColor(lastNum);
+
+        if (lastIssue === lastProcessedIssue) return;
+        lastProcessedIssue = lastIssue;
+
+        let actualResultStr = (modeToggle === "BIGSMALL") ? `${lastNum} (${actualSize})` : `${lastNum} (${actualColor})`;
+        document.getElementById('lastNum').innerText = actualResultStr;
+
+        try {
+            document.getElementById('targetPeriod').innerText = (BigInt(lastIssue) + 1n).toString().slice(-4);
+        } catch(e) { document.getElementById('targetPeriod').innerText = "NEXT"; }
+
+        if (lastPrediction !== null) {
+            let status = "";
+            if (lastPrediction.includes("SKIP")) {
+                status = "SKIPPED";
+                totalSkipped++;
+            } else {
+                let isWin = false;
+                if (modeToggle === "BIGSMALL") {
+                    isWin = (actualSize === lastPrediction);
+                } else {
+                    isWin = (actualColor === lastPrediction);
+                }
+
+                if (isWin) {
+                    status = "WIN";
+                    totalWins++;
+                    // ون آنے پر مارکیٹ موڈ تبدیل ہو جائے گا
+                    modeToggle = (modeToggle === "BIGSMALL") ? "COLOR" : "BIGSMALL";
+                } else {
+                    status = "LOSS";
+                    totalLosses++;
+                    skipCount = 1;
+                    // لاس پر مارکیٹ موڈ وہی رہے گا (Sticky)
+                }
+            }
+
+            historyLogs.unshift({
+                issue: lastIssue, actual: actualResultStr,
+                pred: lastPrediction, status: status
+            });
+
+            document.getElementById('historyBody').innerHTML = historyLogs.map(item => {
+                let badgeClass = 'badge-skip';
+                if (item.status === 'WIN') badgeClass = 'badge-win';
+                if (item.status === 'LOSS') badgeClass = 'badge-loss';
+
+                return `
+                <tr>
+                    <td style="color:var(--text-sub)">${item.issue.slice(-4)}</td>
+                    <td><b>${item.actual}</b></td>
+                    <td style="font-weight:bold">${item.pred}</td>
+                    <td><span class="${badgeClass}">${item.status}</span></td>
+                </tr>
+                `;
+            }).join('');
+
+            document.getElementById('winRateText').innerText = `WIN: ${totalWins}/${totalWins + totalLosses} (SKIPPED: ${totalSkipped})`;
+        }
+
+        const evalResult = computeSmartFlowSignal(list);
+
+        const predElem = document.getElementById('predTrend');
+        predElem.innerText = evalResult.decision;
+
+        const phaseElem = document.getElementById('phaseMode');
+        phaseElem.innerText = `[${modeToggle}] ${evalResult.phase}`;
+
+        predElem.className = "pred-trend";
+        if (evalResult.decision.includes("SKIP")) {
+            predElem.classList.add('skip-mode');
+            phaseElem.classList.add('skip-phase');
+        } else {
+            phaseElem.classList.remove('skip-phase');
+            if (evalResult.decision === "GREEN") predElem.classList.add('green-mode');
+            else if (evalResult.decision === "RED") predElem.classList.add('red-mode');
+        }
+
+        document.getElementById('logicBox').innerText = evalResult.reason;
+        lastPrediction = evalResult.decision;
+    }
+
+    startTimerEngine();
+    runLiveEngine();
+</script>
+
+</body>
+</html>
